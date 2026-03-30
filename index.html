@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Canaan Networks — Monitoreo Empresarial</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy:   #0B1F3A;
+    --teal:   #0E7C86;
+    --teal2:  #14A8B5;
+    --gold:   #D4A843;
+    --gold2:  #F0C866;
+    --cream:  #F7F4EE;
+    --white:  #FFFFFF;
+    --gray:   #8A96A3;
+    --light:  #EEF4F7;
+    --danger: #C94040;
+    --green:  #2D8C5E;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(11,31,58,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(14,124,134,0.25);
+  }
+
+  .logo {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  .logo-main {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .logo-main span { color: var(--teal2); }
+  .logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  nav ul { list-style: none; display: flex; gap: 32px; }
+  nav ul a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color .2s;
+  }
+  nav ul a:hover { color: var(--teal2); }
+
+  .nav-cta {
+    background: var(--teal);
+    color: var(--white) !important;
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-weight: 600 !important;
+    transition: background .2s !important;
+  }
+  .nav-cta:hover { background: var(--teal2) !important; color: var(--white) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 120px 48px 80px;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(14,124,134,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,124,134,0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(14,124,134,0.22) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 820px;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(14,124,134,0.15);
+    border: 1px solid rgba(14,124,134,0.4);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--teal2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--teal2);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(38px, 6vw, 68px);
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--teal2);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 580px;
+    margin: 0 auto 40px;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    border: none; cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary:hover {
+    background: var(--gold2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212,168,67,0.35);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--white);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-outline:hover {
+    border-color: var(--teal2);
+    color: var(--teal2);
+  }
+
+  .hero-trial {
+    margin-top: 48px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .trial-badge {
+    background: linear-gradient(135deg, rgba(212,168,67,0.15), rgba(212,168,67,0.05));
+    border: 1px solid rgba(212,168,67,0.4);
+    border-radius: 12px;
+    padding: 16px 28px;
+    text-align: center;
+  }
+  .trial-badge .trial-emoji { font-size: 22px; }
+  .trial-badge .trial-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--gold2);
+    display: block;
+    margin: 4px 0 2px;
+  }
+  .trial-badge .trial-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── STATS ── */
+  .stats {
+    background: var(--navy);
+    border-top: 1px solid rgba(14,124,134,0.2);
+    padding: 40px 48px;
+    display: flex; justify-content: center; gap: 64px; flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--teal2);
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── SECTION BASE ── */
+  section { position: relative; z-index: 1; }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 100px 48px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    font-size: 16px;
+    color: var(--gray);
+    line-height: 1.8;
+    max-width: 580px;
+    font-weight: 300;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    background: var(--white);
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 32px;
+    margin-top: 56px;
+  }
+
+  .how-card {
+    background: var(--cream);
+    border-radius: 16px;
+    padding: 32px 28px;
+    border: 1px solid rgba(14,124,134,0.1);
+    position: relative;
+    transition: border-color .2s, transform .2s;
+  }
+  .how-card:hover {
+    border-color: rgba(14,124,134,0.4);
+    transform: translateY(-4px);
+  }
+
+  .how-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 52px;
+    color: rgba(14,124,134,0.12);
+    position: absolute;
+    top: 16px; right: 24px;
+    line-height: 1;
+  }
+
+  .how-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--teal), var(--teal2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .how-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--navy);
+  }
+
+  .how-card p {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── TRANSPARENCY BLOCK ── */
+  .transparency {
+    background: var(--navy);
+    padding: 64px 48px;
+  }
+  .transparency-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  .transparency h2 { color: var(--white); }
+  .transparency .section-desc { color: rgba(255,255,255,0.5); }
+
+  .notice-box {
+    background: rgba(14,124,134,0.1);
+    border: 1px solid rgba(14,124,134,0.3);
+    border-left: 4px solid var(--teal2);
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+  .notice-box h4 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--teal2);
+    margin-bottom: 14px;
+  }
+  .notice-box p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+  .notice-box p strong { color: var(--white); font-weight: 600; }
+
+  /* ── PLANS ── */
+  .plans { background: var(--cream); }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-top: 56px;
+    align-items: start;
+  }
+
+  .plan-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 36px 28px;
+    border: 1.5px solid rgba(11,31,58,0.08);
+    position: relative;
+    transition: all .25s;
+  }
+
+  .plan-card:hover {
+    border-color: var(--teal);
+    box-shadow: 0 20px 48px rgba(14,124,134,0.12);
+    transform: translateY(-4px);
+  }
+
+  .plan-card.featured {
+    background: var(--navy);
+    border-color: var(--teal2);
+    box-shadow: 0 24px 60px rgba(11,31,58,0.25);
+  }
+
+  .plan-featured-badge {
+    position: absolute;
+    top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 100px;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .plan-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  .plan-card.featured .plan-name { color: var(--teal2); }
+
+  .plan-price {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .plan-card.featured .plan-price { color: var(--white); }
+
+  .plan-price sup {
+    font-size: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    vertical-align: super;
+  }
+  .plan-currency {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gray);
+    margin-bottom: 20px;
+  }
+  .plan-card.featured .plan-currency { color: rgba(255,255,255,0.4); }
+
+  .plan-divider {
+    height: 1px;
+    background: rgba(11,31,58,0.08);
+    margin: 20px 0;
+  }
+  .plan-card.featured .plan-divider { background: rgba(255,255,255,0.1); }
+
+  .plan-features { list-style: none; margin-bottom: 28px; }
+  .plan-features li {
+    font-size: 14px;
+    color: var(--gray);
+    padding: 7px 0;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+  .plan-card.featured .plan-features li { color: rgba(255,255,255,0.65); }
+  .plan-features li::before {
+    content: '✓';
+    color: var(--teal);
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .plan-card.featured .plan-features li::before { color: var(--teal2); }
+
+  .plan-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  .plan-btn-outline {
+    background: transparent;
+    border: 1.5px solid rgba(11,31,58,0.15) !important;
+    color: var(--navy);
+  }
+  .plan-btn-outline:hover {
+    border-color: var(--teal) !important;
+    color: var(--teal);
+  }
+
+  .plan-btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  .plan-btn-primary:hover {
+    background: var(--gold2);
+    box-shadow: 0 6px 20px rgba(212,168,67,0.4);
+  }
+
+  .plan-btn-teal {
+    background: var(--teal);
+    color: var(--white);
+  }
+  .plan-btn-teal:hover {
+    background: var(--teal2);
+  }
+
+  /* ── CERTS ── */
+  .certs { background: var(--white); }
+
+  .certs-flex {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    margin-top: 40px;
+  }
+
+  .cert-tag {
+    background: var(--cream);
+    border: 1px solid rgba(14,124,134,0.2);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cert-tag span { color: var(--teal); }
+
+  .engineer-card {
+    margin-top: 56px;
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 40px 48px;
+    display: flex; gap: 40px; align-items: center; flex-wrap: wrap;
+  }
+
+  .eng-avatar {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--teal), var(--teal2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--white);
+    flex-shrink: 0;
+    border: 3px solid var(--gold);
+  }
+
+  .eng-info h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .eng-info .eng-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .eng-info p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.7;
+    font-weight: 300;
+    max-width: 500px;
+  }
+
+  /* ── CONTACT ── */
+  .contact { background: var(--cream); }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    margin-top: 48px;
+  }
+
+  .contact-info h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 24px;
+    color: var(--navy);
+  }
+
+  .contact-item {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px;
+  }
+  .contact-icon {
+    width: 40px; height: 40px;
+    background: rgba(14,124,134,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .contact-item-text span {
+    display: block;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+  }
+  .contact-item-text a, .contact-item-text p {
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .contact-item-text a:hover { color: var(--teal); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    padding: 40px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    border-top: 1px solid rgba(14,124,134,0.2);
+  }
+
+  footer p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(11,31,58,0.85);
+    backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border-radius: 24px;
+    max-width: 540px; width: 100%;
+    padding: 48px 40px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .3s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-close {
+    position: absolute; top: 20px; right: 20px;
+    background: var(--cream); border: none; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--gray);
+    transition: background .2s;
+  }
+  .modal-close:hover { background: var(--light); }
+
+  .modal-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .modal-logo span { color: var(--teal); }
+
+  .modal-plan-badge {
+    display: inline-block;
+    background: rgba(14,124,134,0.1);
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(14,124,134,0.2);
+  }
+
+  .modal h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .modal p.modal-desc {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 28px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(11,31,58,0.12);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--cream);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(14,124,134,0.1);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .form-optional {
+    font-size: 10px;
+    color: var(--gray);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .modal-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .2s;
+    margin-top: 8px;
+  }
+  .modal-submit:hover {
+    background: var(--teal);
+    box-shadow: 0 6px 20px rgba(14,124,134,0.3);
+  }
+  .modal-submit:disabled {
+    opacity: 0.6; cursor: not-allowed;
+  }
+
+  .modal-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 14px;
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── SUCCESS STATE ── */
+  .success-state {
+    text-align: center;
+    padding: 20px 0;
+    display: none;
+  }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: rgba(45,140,94,0.1);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+    border: 2px solid rgba(45,140,94,0.3);
+  }
+  .success-state h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .success-state p {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.7;
+  }
+
+  /* ── ERROR ── */
+  .form-error {
+    background: rgba(201,64,64,0.08);
+    border: 1px solid rgba(201,64,64,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    nav ul { display: none; }
+    .section-inner { padding: 64px 24px; }
+    .hero { padding: 100px 24px 64px; }
+    .stats { padding: 32px 24px; gap: 32px; }
+    .transparency-inner { grid-template-columns: 1fr; gap: 32px; }
+    .transparency { padding: 64px 24px; }
+    .contact-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; }
+    .engineer-card { padding: 28px 24px; }
+    .modal { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <span class="logo-main">Canaan <span>Networks</span></span>
+    <span class="logo-sub">by · Ing. Palacios</span>
+  </div>
+  <ul>
+    <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#planes">Planes</a></li>
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+    <li><a href="#planes" class="nav-cta">Prueba gratis</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Monitoreo · Observabilidad · Alertas en tiempo real</div>
+    <h1>Sabé exactamente cuándo <em>falla</em> tu internet empresarial</h1>
+    <p class="hero-sub">
+      Dashboards profesionales, alertas automáticas por WhatsApp y Telegram.
+      Sin contratos complicados. Sin soporte forzado. Solo visibilidad total de tu infraestructura.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openModal('Plan Básico · 1 Dispositivo')">🎯 Comenzar prueba gratis</button>
+      <a href="#como-funciona" class="btn-outline">Ver cómo funciona →</a>
+    </div>
+
+    <div class="hero-trial">
+      <div class="trial-badge">
+        <span class="trial-emoji">🎯</span>
+        <span class="trial-title">14 días GRATIS</span>
+        <span class="trial-desc">3 dispositivos · sin tarjeta · sin compromiso</span>
+      </div>
+      <div style="color:rgba(255,255,255,0.3); font-size:22px;">→</div>
+      <div class="trial-badge">
+        <span class="trial-emoji">✅</span>
+        <span class="trial-title">Migrás a pago</span>
+        <span class="trial-desc">Solo si lo valorás · desde Q200/mes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-num">24/7</span>
+    <span class="stat-label">Monitoreo continuo</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">&lt;1 min</span>
+    <span class="stat-label">Tiempo de alerta</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">100%</span>
+    <span class="stat-label">Dashboard privado</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">Q200</span>
+    <span class="stat-label">Desde / mensual</span>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section class="how" id="como-funciona">
+  <div class="section-inner">
+    <div class="section-label">// cómo funciona</div>
+    <h2>Visibilidad total.<br/>Sin complicaciones.</h2>
+    <p class="section-desc">Instalás un agente ligero en tus dispositivos y desde ese momento tenés visibilidad completa desde cualquier navegador, sin instalar nada más.</p>
+
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-icon">📦</div>
+        <h3>Instalás el agente</h3>
+        <p>Un comando simple en tu servidor o equipo. El agente es ligero y no afecta el rendimiento de tu infraestructura.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-icon">📊</div>
+        <h3>Dashboard privado</h3>
+        <p>Accedés a tu panel exclusivo en Grafana con métricas en tiempo real, semáforos y lenguaje simple. Sin jerga técnica.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-icon">🔔</div>
+        <h3>Alertas automáticas</h3>
+        <p>Si algo falla, recibís alerta por WhatsApp o Telegram con contexto claro: qué dispositivo, cuánto tiempo, qué puede afectar.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <div class="how-icon">📈</div>
+        <h3>Reportes mensuales</h3>
+        <p>Cada mes recibís un resumen automático con el comportamiento de tu infraestructura. Sin que tengás que hacer nada.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSPARENCIA -->
+<section class="transparency">
+  <div class="transparency-inner">
+    <div>
+      <div class="section-label" style="color:var(--teal2)">// transparencia total</div>
+      <h2 style="color:var(--white)">Sabés exactamente<br/>qué estás comprando</h2>
+      <p class="section-desc" style="color:rgba(255,255,255,0.5); margin-top:16px;">
+        Somos honestos desde el principio. Canaan Networks ofrece <strong style="color:var(--white)">observabilidad, no soporte operativo</strong>. Eso nos permite mantener precios accesibles y un servicio confiable y escalable.
+      </p>
+    </div>
+    <div class="notice-box">
+      <h4>⚠️ Importante: Qué incluye y qué no</h4>
+      <p>
+        <strong>SÍ incluye:</strong> monitoreo 24/7, alertas automáticas por WhatsApp/Telegram, dashboard privado, reportes mensuales automáticos y onboarding guiado.<br/><br/>
+        <strong>NO incluye:</strong> soporte técnico reactivo. Si tu servidor cae a las 2am, <strong>te avisamos de inmediato</strong>, pero la resolución es responsabilidad de tu equipo o proveedor. Esto es por diseño: así mantenemos el costo bajo y el servicio escalable.<br/><br/>
+        <strong>Futuro:</strong> Estamos desarrollando automatizaciones con n8n para acciones de respuesta automática como próxima fase del servicio.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PLANES -->
+<section class="plans" id="planes">
+  <div class="section-inner">
+    <div class="section-label">// planes y precios</div>
+    <h2>Simple, claro,<br/>sin letras pequeñas.</h2>
+    <p class="section-desc">Todos los planes incluyen 14 días de prueba gratis. Después migrás a pago consentido.</p>
+
+    <div class="plans-grid">
+
+      <!-- PLAN SOLO -->
+      <div class="plan-card">
+        <div class="plan-name">Solo</div>
+        <div class="plan-price"><sup>Q</sup>200</div>
+        <div class="plan-currency">/ mes · 1 dispositivo</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>1 dispositivo monitoreado</li>
+          <li>Dashboard privado en Grafana</li>
+          <li>Alertas por WhatsApp o Telegram</li>
+          <li>Métricas: CPU, RAM, disco, red</li>
+          <li>Reporte mensual automático</li>
+        </ul>
+        <button class="plan-btn plan-btn-outline" onclick="openModal('Plan Solo · 1 Dispositivo — Q200/mes')">Solicitar información →</button>
+      </div>
+
+      <!-- PLAN BÁSICO (FEATURED) -->
+      <div class="plan-card featured">
+        <div class="plan-featured-badge">⭐ Más popular</div>
+        <div class="plan-name">Básico</div>
+        <div class="plan-price"><sup>Q</sup>400</div>
+        <div class="plan-currency">/ mes · hasta 3 dispositivos</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Hasta 3 dispositivos</li>
+          <li>Dashboard privado personalizado</li>
+          <li>Alertas inteligentes por WhatsApp/Telegram</li>
+          <li>Métricas completas de red y enlace</li>
+          <li>Reporte mensual automático</li>
+          <li>Onboarding guiado incluido</li>
+          <li>🎯 14 días GRATIS al inicio</li>
+        </ul>
+        <button class="plan-btn plan-btn-primary" onclick="openModal('Plan Básico · 3 Dispositivos — Q400/mes')">Solicitar información →</button>
+      </div>
+
+      <!-- PLAN MEDIO -->
+      <div class="plan-card">
+        <div class="plan-name">Profesional</div>
+        <div class="plan-price"><sup>Q</sup>800</div>
+        <div class="plan-currency">/ mes · hasta 8 dispositivos</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Hasta 8 dispositivos</li>
+          <li>Dashboards personalizados con logo</li>
+          <li>Alertas multi-canal configurables</li>
+          <li>Métricas avanzadas de red</li>
+          <li>Reportes mensuales detallados</li>
+          <li>Subdomain propio opcional</li>
+        </ul>
+        <button class="plan-btn plan-btn-outline" onclick="openModal('Plan Profesional · 8 Dispositivos — Q800/mes')">Solicitar información →</button>
+      </div>
+
+      <!-- PLAN ENTERPRISE -->
+      <div class="plan-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price"><sup>Q</sup>1,500</div>
+        <div class="plan-currency">/ mes · desde 10 dispositivos</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>10+ dispositivos a medida</li>
+          <li>Dashboard branded con dominio propio</li>
+          <li>SLA de tiempo de alerta definido</li>
+          <li>Integraciones personalizadas</li>
+          <li>Automatizaciones con n8n</li>
+          <li>Reunión mensual de revisión</li>
+        </ul>
+        <button class="plan-btn plan-btn-teal" onclick="openModal('Plan Enterprise · 10+ Dispositivos — Q1,500+/mes')">Solicitar información →</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CERTS / NOSOTROS -->
+<section class="certs" id="nosotros">
+  <div class="section-inner">
+    <div class="section-label">// quiénes somos</div>
+    <h2>Conocimiento técnico real.<br/>Experiencia certificada.</h2>
+    <p class="section-desc">Canaan Networks nace de la experiencia práctica en redes empresariales y ciberseguridad, con certificaciones internacionales reconocidas.</p>
+
+    <div class="certs-flex">
+      <div class="cert-tag"><span>🔵</span> CCNA — Cisco</div>
+      <div class="cert-tag"><span>🔴</span> MTCNA — MikroTik</div>
+      <div class="cert-tag"><span>🟠</span> HCIA — Huawei</div>
+      <div class="cert-tag"><span>🟢</span> JNCIA — Juniper</div>
+      <div class="cert-tag"><span>🛡️</span> Ciberseguridad</div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section class="contact" id="contacto">
+  <div class="section-inner">
+    <div class="section-label">// contacto</div>
+    <h2>¿Tenés dudas?<br/>Escribinos.</h2>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Canaan Networks</h3>
+
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div class="contact-item-text">
+            <span>WhatsApp</span>
+            <a href="https://wa.me/50239210836" target="_blank">+502 3921 0836</a>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div class="contact-item-text">
+            <span>Correo corporativo</span>
+            <a href="mailto:support@canaannetworks.com">support@canaannetworks.com</a>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">🕐</div>
+          <div class="contact-item-text">
+            <span>Horario de atención</span>
+            <p>Lunes a Viernes · 8:00 AM – 5:00 PM</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">🌐</div>
+          <div class="contact-item-text">
+            <span>Modalidad</span>
+            <p>100% virtual · Guatemala</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="background:var(--navy); border-radius:20px; padding:36px; height:100%;">
+          <div style="font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); margin-bottom:12px;">¿Listo para ver tu red en tiempo real?</div>
+          <p style="font-size:14px; color:rgba(255,255,255,0.5); line-height:1.7; margin-bottom:28px; font-weight:300;">
+            Empezá con 14 días gratis. Sin compromisos, sin tarjeta. Solo escribinos y coordinamos el onboarding.
+          </p>
+          <button class="btn-primary" style="width:100%; font-size:15px;" onclick="openModal('Plan Básico · 3 Dispositivos — Q400/mes')">
+            🎯 Solicitar prueba gratuita
+          </button>
+          <div style="margin-top:16px; text-align:center;">
+            <a href="https://wa.me/50239210836" target="_blank" style="font-size:13px; color:rgba(255,255,255,0.4); text-decoration:none;">
+              O escribinos directamente por WhatsApp →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">
+    <span class="logo-main" style="font-size:16px;">Canaan <span style="color:var(--teal2)">Networks</span></span>
+    <span class="logo-sub">by · Ing. Palacios · Guatemala</span>
+  </div>
+  <p>© 2025 Canaan Networks · Pequeño Contribuyente · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1a696f6a6a75686e5a797b747b7b74747f6e6d7568716934797577">[email&#160;protected]</a></p>
+  <p>Servicio 100% virtual · Guatemala</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div id="form-state">
+      <div class="modal-logo">Canaan <span>Networks</span></div>
+      <div class="modal-plan-badge" id="modal-plan-badge">Plan Básico</div>
+      <h3>Solicitud de información</h3>
+      <p class="modal-desc">Completá tus datos y te enviamos por correo la información completa del plan con una pre-factura de referencia.</p>
+
+      <div class="form-error" id="form-error"></div>
+
+      <div class="form-group">
+        <label>Nombre o empresa <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="field-name" placeholder="Ej. Distribuidora García / Juan García" />
+      </div>
+
+      <div class="form-group">
+        <label>Correo electrónico <span style="color:var(--danger)">*</span></label>
+        <input type="email" id="field-email" placeholder="correo@tuempresa.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono de contacto <span class="form-optional">(opcional)</span></label>
+        <input type="tel" id="field-phone" placeholder="+502 xxxx xxxx" />
+      </div>
+
+      <div class="form-group">
+        <label>Plan de interés <span style="color:var(--danger)">*</span></label>
+        <select id="field-plan">
+          <option value="">Seleccioná un plan...</option>
+          <option value="Plan Solo · 1 Dispositivo — Q200/mes">🔹 Solo — 1 dispositivo · Q200/mes</option>
+          <option value="Plan Básico · 3 Dispositivos — Q400/mes">⭐ Básico — 3 dispositivos · Q400/mes</option>
+          <option value="Plan Profesional · 8 Dispositivos — Q800/mes">🔷 Profesional — 8 dispositivos · Q800/mes</option>
+          <option value="Plan Enterprise · 10+ Dispositivos — Q1,500+/mes">🏢 Enterprise — 10+ dispositivos · Q1,500+/mes</option>
+          <option value="14 días gratis — 3 Dispositivos">🎯 Quiero los 14 días GRATIS</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Comentarios o consulta <span class="form-optional">(opcional)</span></label>
+        <textarea id="field-notes" placeholder="Contanos sobre tu infraestructura o dudas específicas..."></textarea>
+      </div>
+
+      <button class="modal-submit" id="submit-btn" onclick="submitForm()">
+        Enviar solicitud y recibir pre-factura →
+      </button>
+      <p class="modal-note">
+        Recibirás un correo con PDF adjunto · Respondemos en horario hábil<br/>
+        8:00 AM – 5:00 PM · Lun–Vie
+      </p>
+    </div>
+
+    <div class="success-state" id="success-state">
+      <div class="success-icon">✅</div>
+      <h3>¡Solicitud enviada!</h3>
+      <p>
+        Revisá tu correo. Te enviamos la información del plan y una pre-factura de referencia.<br/><br/>
+        También podés escribirnos directamente al<br/>
+        <strong>+502 3921 0836 (WhatsApp)</strong><br/>
+        <a href="/cdn-cgi/l/email-protection#55262025253a27211536343b34343b3b3021223a273e267b363a38" style="color:var(--teal)"><span class="__cf_email__" data-cfemail="96e5e3e6e6f9e4e2d6f5f7f8f7f7f8f8f3e2e1f9e4fde5b8f5f9fb">[email&#160;protected]</span></a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── MODAL ──
+  function openModal(plan) {
+    document.getElementById('modal').classList.add('open');
+    document.getElementById('modal-plan-badge').textContent = plan || 'Consulta general';
+    const sel = document.getElementById('field-plan');
+    for (let opt of sel.options) {
+      if (opt.value.includes(plan?.split('·')[0]?.trim() || '')) {
+        sel.value = opt.value; break;
+      }
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+    // reset
+    document.getElementById('form-state').style.display = '';
+    document.getElementById('success-state').style.display = 'none';
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').textContent = 'Enviar solicitud y recibir pre-factura →';
+  }
+
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ── SUBMIT ──
+  async function submitForm() {
+    const name  = document.getElementById('field-name').value.trim();
+    const email = document.getElementById('field-email').value.trim();
+    const phone = document.getElementById('field-phone').value.trim();
+    const plan  = document.getElementById('field-plan').value;
+    const notes = document.getElementById('field-notes').value.trim();
+    const errEl = document.getElementById('form-error');
+
+    errEl.style.display = 'none';
+
+    if (!name || !email || !plan) {
+      errEl.textContent = 'Por favor completá los campos obligatorios: nombre, correo y plan.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errEl.textContent = 'El correo electrónico no es válido.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generando pre-factura y enviando...';
+
+    try {
+      // Generate PDF as base64 in browser
+      const pdfB64 = generatePDF({ name, email, phone, plan, notes });
+
+      // Send via EmailJS (free tier) — uses mailto fallback if not configured
+      await sendEmail({ name, email, phone, plan, notes, pdfB64 });
+
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('success-state').style.display = 'block';
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar solicitud y recibir pre-factura →';
+      errEl.textContent = 'Hubo un error al enviar. Por favor escribinos directamente a support@canaannetworks.com';
+      errEl.style.display = 'block';
+    }
+  }
+
+  // ── PDF GENERATION (pure JS / jsPDF) ──
+  function generatePDF({ name, email, phone, plan, notes }) {
+    // We'll build a data URI for the PDF using raw PDF syntax
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-GT', { year:'numeric', month:'long', day:'numeric' });
+    const invoiceNum = 'CN-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Math.floor(Math.random()*9000+1000);
+
+    // Price extraction
+    const priceMatch = plan.match(/Q([\d,]+)/);
+    const price = priceMatch ? priceMatch[1] : '—';
+    const cleanPlan = plan.replace(/[🔹⭐🔷🏢🎯]/g, '').trim();
+
+    // Build PDF content as data for download
+    const content = `
+CANAAN NETWORKS
+by Ing. Palacios — Guatemala
+Pequeño Contribuyente
+support@canaannetworks.com | +502 3921 0836
+
+═══════════════════════════════════════
+   PRE-FACTURA DE REFERENCIA
+   ${invoiceNum}
+═══════════════════════════════════════
+
+Fecha: ${dateStr}
+
+DATOS DEL SOLICITANTE
+─────────────────────
+Nombre / Empresa : ${name}
+Correo           : ${email}
+Teléfono         : ${phone || 'No proporcionado'}
+
+DETALLE DE SERVICIO
+───────────────────
+Servicio   : Monitoreo empresarial de red e infraestructura
+Plan       : ${cleanPlan}
+Período    : Mensual (renovación automática)
+Precio     : Q${price} / mes
+
+INCLUYE
+───────
+✓ Monitoreo 24/7 de dispositivos
+✓ Dashboard privado en Grafana
+✓ Alertas automáticas WhatsApp/Telegram
+✓ Reporte mensual automático
+✓ Onboarding guiado
+✓ 14 días de prueba gratuita al inicio
+
+NO INCLUYE
+──────────
+✗ Soporte técnico reactivo
+✗ Resolución de incidentes on-site
+  (Canaan Networks es un servicio de observabilidad)
+
+${notes ? `CONSULTA / COMENTARIOS\n──────────────────────\n${notes}\n` : ''}
+
+NOTAS IMPORTANTES
+─────────────────
+• Este documento es una PRE-FACTURA de referencia.
+• La factura oficial y regulada por SAT será emitida
+  por Canaan Networks / Ing. Palacios al confirmar el servicio.
+• Los pagos se realizan a nombre de Ing. Palacios
+  (titular del servicio como pequeño contribuyente).
+• Período de prueba: 14 días gratuitos con 3 dispositivos.
+  Después de la prueba, migración a plan de pago consentido.
+
+CONTACTO Y COORDINACIÓN
+────────────────────────
+WhatsApp  : +502 3921 0836
+Correo    : support@canaannetworks.com
+Atención  : Lunes a Viernes · 8:00 AM – 5:00 PM
+Modalidad : 100% virtual · Guatemala
+
+═══════════════════════════════════════
+Canaan Networks — Observabilidad empresarial
+Monitoreamos. Vos decidís.
+═══════════════════════════════════════
+    `.trim();
+
+    return btoa(unescape(encodeURIComponent(content)));
+  }
+
+  // ── EMAIL SEND via mailto + Formspree fallback ──
+  async function sendEmail({ name, email, phone, plan, notes, pdfB64 }) {
+    const cleanPlan = plan.replace(/[🔹⭐🔷🏢🎯]/g, '').trim();
+    const invoiceNum = 'CN-' + new Date().getFullYear() + '-' + String(new Date().getMonth()+1).padStart(2,'0') + String(new Date().getDate()).padStart(2,'0') + '-' + Math.floor(Math.random()*9000+1000);
+
+    // Trigger download of PDF for user
+    const pdfContent = atob(pdfB64);
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Canaan-Networks-${invoiceNum}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Send via Formspree (replace with your endpoint)
+    const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mlgobrdk';
+
+    const body = `
+🏢 NUEVA SOLICITUD — CANAAN NETWORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pre-Factura: ${invoiceNum}
+Fecha: ${new Date().toLocaleDateString('es-GT')}
+
+DATOS DEL SOLICITANTE
+• Nombre / Empresa : ${name}
+• Correo           : ${email}
+• Teléfono         : ${phone || 'No proporcionado'}
+• Plan solicitado  : ${cleanPlan}
+
+${notes ? `CONSULTA:\n${notes}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Canaan Networks — support@canaannetworks.com
+    `.trim();
+
+    try {
+      const resp = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name, email, phone, plan: cleanPlan, notes, message: body, _replyto: email, _subject: `[Canaan Networks] ${invoiceNum} — Solicitud de ${name}` })
+      });
+      if (!resp.ok) throw new Error('Formspree error');
+    } catch {
+      // Fallback: open mailto
+      const subject = encodeURIComponent(`[Canaan Networks] Solicitud — ${name}`);
+      const mailBody = encodeURIComponent(body);
+      window.open(`mailto:support@canaannetworks.com?subject=${subject}&body=${mailBody}`, '_blank');
+    }
+  }
+
+  // ── INTERSECTION OBSERVER animations ──
+  const cards = document.querySelectorAll('.how-card, .plan-card, .cert-tag, .contact-item');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setT
