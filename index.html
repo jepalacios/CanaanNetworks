@@ -886,7 +886,7 @@
       Sin contratos complicados. Sin soporte forzado. Solo visibilidad total de tu infraestructura.
     </p>
     <div class="hero-actions">
-      <button class="btn-primary" onclick="openModal('Plan Básico · 1 Dispositivo')">🎯 Comenzar prueba gratis</button>
+      <button class="btn-primary" data-modal="Plan Básico · 1 Dispositivo">🎯 Comenzar prueba gratis</button>
       <a href="#como-funciona" class="btn-outline">Ver cómo funciona →</a>
     </div>
 
@@ -1005,7 +1005,7 @@
           <li>Métricas: CPU, RAM, disco, red</li>
           <li>Reporte mensual automático</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="openModal('Plan Solo · 1 Dispositivo — Q200/mes')">Solicitar información →</button>
+        <button class="plan-btn plan-btn-outline" data-modal="Plan Solo · 1 Dispositivo — Q200/mes">Solicitar información →</button>
       </div>
 
       <!-- PLAN BÁSICO (FEATURED) -->
@@ -1024,7 +1024,7 @@
           <li>Onboarding guiado incluido</li>
           <li>🎯 14 días GRATIS al inicio</li>
         </ul>
-        <button class="plan-btn plan-btn-primary" onclick="openModal('Plan Básico · 3 Dispositivos — Q400/mes')">Solicitar información →</button>
+        <button class="plan-btn plan-btn-primary" data-modal="Plan Básico · 3 Dispositivos — Q400/mes">Solicitar información →</button>
       </div>
 
       <!-- PLAN MEDIO -->
@@ -1041,7 +1041,7 @@
           <li>Reportes mensuales detallados</li>
           <li>Subdomain propio opcional</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="openModal('Plan Profesional · 8 Dispositivos — Q800/mes')">Solicitar información →</button>
+        <button class="plan-btn plan-btn-outline" data-modal="Plan Profesional · 8 Dispositivos — Q800/mes">Solicitar información →</button>
       </div>
 
       <!-- PLAN PERSONALIZADO -->
@@ -1058,7 +1058,7 @@
           <li>Solución adaptada a tu infraestructura</li>
           <li>Reunión de levantamiento incluida</li>
         </ul>
-        <button class="plan-btn plan-btn-teal" onclick="openModal('Plan Personalizado — Cotización')">Solicitar cotización →</button>
+        <button class="plan-btn plan-btn-teal" data-modal="Plan Personalizado — Cotización">Solicitar cotización →</button>
       </div>
 
     </div>
@@ -1133,7 +1133,7 @@
           <p style="font-size:14px; color:rgba(255,255,255,0.5); line-height:1.7; margin-bottom:28px; font-weight:300;">
             Empezá con 14 días gratis. Sin compromisos, sin tarjeta. Solo escribinos y coordinamos el onboarding.
           </p>
-          <button class="btn-primary" style="width:100%; font-size:15px;" onclick="openModal('Plan Básico · 3 Dispositivos — Q400/mes')">
+          <button class="btn-primary" style="width:100%; font-size:15px;" data-modal="Plan Básico · 3 Dispositivos — Q400/mes">
             🎯 Solicitar prueba gratuita
           </button>
           <div style="margin-top:16px; text-align:center;">
@@ -1160,7 +1160,7 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" id="modal-close-btn">✕</button>
 
     <div id="form-state">
       <div class="modal-logo">Canaan <span>Networks</span></div>
@@ -1202,7 +1202,7 @@
         <textarea id="field-notes" placeholder="Contanos sobre tu infraestructura o dudas específicas..."></textarea>
       </div>
 
-      <button class="modal-submit" id="submit-btn" onclick="submitForm()">
+      <button class="modal-submit" id="submit-btn">
         Enviar solicitud y recibir pre-factura →
       </button>
       <p class="modal-note">
@@ -1224,9 +1224,242 @@
   </div>
 </div>
 
-<script>
-  // ── MODAL ──
-  function openModal(plan) {
+<script data-cfasync="false">
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ── MODAL OPEN via data-modal buttons ──
+  document.querySelectorAll('[data-modal]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      openModal(this.getAttribute('data-modal'));
+    });
+  });
+
+  // ── MODAL CLOSE ──
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ── SUBMIT ──
+  document.getElementById('submit-btn').addEventListener('click', submitForm);
+
+  // ── ANIMATIONS ──
+  const cards = document.querySelectorAll('.how-card, .plan-card, .cert-tag, .contact-item');
+  const obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e, i) {
+      if (e.isIntersecting) {
+        setTimeout(function() {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }, i * 60);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(function(c) {
+    c.style.opacity = '0';
+    c.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    c.style.transform = 'translateY(16px)';
+    obs.observe(c);
+  });
+
+});
+
+// ── FUNCTIONS (global scope) ──
+function openModal(plan) {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-plan-badge').textContent = plan || 'Consulta general';
+  var sel = document.getElementById('field-plan');
+  for (var i = 0; i < sel.options.length; i++) {
+    var opt = sel.options[i];
+    var key = plan ? plan.split('·')[0].trim() : '';
+    if (opt.value.includes(key)) { sel.value = opt.value; break; }
+  }
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('form-state').style.display = '';
+  document.getElementById('success-state').style.display = 'none';
+  document.getElementById('form-error').style.display = 'none';
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.textContent = 'Enviar solicitud y recibir pre-factura →';
+}
+
+async function submitForm() {
+  var name  = document.getElementById('field-name').value.trim();
+  var email = document.getElementById('field-email').value.trim();
+  var phone = document.getElementById('field-phone').value.trim();
+  var plan  = document.getElementById('field-plan').value;
+  var notes = document.getElementById('field-notes').value.trim();
+  var errEl = document.getElementById('form-error');
+
+  errEl.style.display = 'none';
+
+  if (!name || !email || !plan) {
+    errEl.textContent = 'Por favor completá los campos obligatorios: nombre, correo y plan.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'El correo electrónico no es válido.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando solicitud...';
+
+  try {
+    var pdfB64 = generatePDF({ name, email, phone, plan, notes });
+    await sendEmail({ name, email, phone, plan, notes, pdfB64 });
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('success-state').style.display = 'block';
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Enviar solicitud y recibir pre-factura →';
+    errEl.textContent = 'Hubo un error al enviar. Por favor escribinos directamente a support@canaannetworks.com';
+    errEl.style.display = 'block';
+  }
+}
+
+function generatePDF({ name, email, phone, plan, notes }) {
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('es-GT', { year:'numeric', month:'long', day:'numeric' });
+  var invoiceNum = 'CN-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Math.floor(Math.random()*9000+1000);
+  var priceMatch = plan.match(/Q([\d,]+)/);
+  var price = priceMatch ? priceMatch[1] : 'A cotizar';
+  var cleanPlan = plan.replace(/[🔹⭐🔷🏢🎯]/g, '').trim();
+
+  var content = [
+    'CANAAN NETWORKS',
+    'by Ing. Palacios — Guatemala',
+    'Pequeño Contribuyente',
+    'support@canaannetworks.com | +502 5704 8775',
+    '',
+    '═══════════════════════════════════════',
+    '   PRE-FACTURA DE REFERENCIA',
+    '   ' + invoiceNum,
+    '═══════════════════════════════════════',
+    '',
+    'Fecha: ' + dateStr,
+    '',
+    'DATOS DEL SOLICITANTE',
+    '─────────────────────',
+    'Nombre / Empresa : ' + name,
+    'Correo           : ' + email,
+    'Teléfono         : ' + (phone || 'No proporcionado'),
+    '',
+    'DETALLE DE SERVICIO',
+    '───────────────────',
+    'Servicio   : Monitoreo empresarial de red e infraestructura',
+    'Plan       : ' + cleanPlan,
+    'Período    : Mensual (renovación automática)',
+    'Precio     : Q' + price + (price === 'A cotizar' ? '' : ' / mes'),
+    '',
+    'INCLUYE',
+    '───────',
+    '✓ Monitoreo 24/7 de dispositivos',
+    '✓ Dashboard privado en Grafana',
+    '✓ Alertas automáticas WhatsApp/Telegram',
+    '✓ Reporte mensual automático',
+    '✓ Onboarding guiado',
+    '✓ 14 días de prueba gratuita al inicio',
+    '',
+    'NO INCLUYE',
+    '──────────',
+    '✗ Soporte técnico reactivo',
+    '✗ Resolución de incidentes on-site',
+    '  (Canaan Networks es un servicio de observabilidad)',
+    '',
+    notes ? ('CONSULTA / COMENTARIOS\n──────────────────────\n' + notes + '\n') : '',
+    'NOTAS IMPORTANTES',
+    '─────────────────',
+    '• Este documento es una PRE-FACTURA de referencia.',
+    '• La factura oficial regulada por SAT será emitida',
+    '  por Canaan Networks / Ing. Palacios al confirmar el servicio.',
+    '• Período de prueba: 14 días gratuitos con 3 dispositivos.',
+    '',
+    'CONTACTO',
+    '────────',
+    'WhatsApp  : +502 5704 8775',
+    'Correo    : support@canaannetworks.com',
+    'Atención  : Lunes a Viernes · 8:00 AM – 5:00 PM',
+    '',
+    '═══════════════════════════════════════',
+    'Canaan Networks — Observabilidad empresarial',
+    'Monitoreamos. Vos decidís.',
+    '═══════════════════════════════════════'
+  ].join('\n');
+
+  return btoa(unescape(encodeURIComponent(content)));
+}
+
+async function sendEmail({ name, email, phone, plan, notes, pdfB64 }) {
+  var cleanPlan = plan.replace(/[🔹⭐🔷🏢🎯]/g, '').trim();
+  var invoiceNum = 'CN-' + new Date().getFullYear() + '-' + String(new Date().getMonth()+1).padStart(2,'0') + String(new Date().getDate()).padStart(2,'0') + '-' + Math.floor(Math.random()*9000+1000);
+
+  // Download pre-factura
+  var pdfContent = atob(pdfB64);
+  var blob = new Blob([pdfContent], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Canaan-Networks-' + invoiceNum + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  var FORMSPREE_ENDPOINT = 'https://formspree.io/f/mwvyypwn';
+
+  var body = [
+    '🏢 NUEVA SOLICITUD — CANAAN NETWORKS',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    'Pre-Factura : ' + invoiceNum,
+    'Fecha       : ' + new Date().toLocaleDateString('es-GT'),
+    '',
+    'DATOS DEL SOLICITANTE',
+    '• Nombre / Empresa : ' + name,
+    '• Correo           : ' + email,
+    '• Teléfono         : ' + (phone || 'No proporcionado'),
+    '• Plan solicitado  : ' + cleanPlan,
+    '',
+    notes ? ('CONSULTA:\n' + notes) : '',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    'Canaan Networks — support@canaannetworks.com'
+  ].join('\n');
+
+  try {
+    var resp = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        phone: phone || 'No proporcionado',
+        plan: cleanPlan,
+        notes: notes,
+        message: body,
+        _replyto: email,
+        _subject: '[Canaan Networks] ' + invoiceNum + ' — Solicitud de ' + name
+      })
+    });
+    if (!resp.ok) throw new Error('Formspree error');
+  } catch(e) {
+    var subject = encodeURIComponent('[Canaan Networks] Solicitud — ' + name);
+    var mailBody = encodeURIComponent(body);
+    window.open('mailto:support@canaannetworks.com?subject=' + subject + '&body=' + mailBody, '_blank');
+  }
+}
+</script>
+</body>
+</html>
     document.getElementById('modal').classList.add('open');
     document.getElementById('modal-plan-badge').textContent = plan || 'Consulta general';
     const sel = document.getElementById('field-plan');
@@ -1435,4 +1668,22 @@ Canaan Networks — support@canaannetworks.com
   const obs = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => {
       if (e.isIntersecting) {
-        setT
+        setTimeout(() => {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }, i * 60);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(c => {
+    c.style.opacity = '0';
+    c.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    c.style.transform = 'translateY(16px)';
+    obs.observe(c);
+  });
+
+</script>
+</body>
+</html>
